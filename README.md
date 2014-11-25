@@ -60,9 +60,10 @@ Now every existing URL has been duplicated into as many languages you've declare
 ## Root URL
 
 By default, the root URL autodetects the browser language and performs a redirection to its root page.
-So if you're Spanish, you'll be redirected to `/es` but if you're Russian, you'll be redirected to `/en` (fallback to the primary language).
 
-You can override the default handler by setting the `MULTILANG.root` to a custom handler:
+In our example, a Spanish user would be redirected to `/es` while a Russian user would be redirected to `/en` (fallback to the primary language).
+
+You can override this default behaviour by setting the `MULTILANG.root` to a custom handler:
 ```ini
 [MULTILANG]
 root = App\MyRoot
@@ -75,7 +76,7 @@ Use case: display a splash page with the list of available languages.
 (requires the usage of [route aliases](http://fatfreeframework.com/routing-engine#named-routes))
 
 ### Rewrite URLs
-A translated URL consist of a language identifier followed by the original URL:
+Each translated URL consists of a language identifier followed by the original URL:
 ```
 /es + /terms-and-conditions = /es/terms-and-conditions
 ```
@@ -97,7 +98,7 @@ terms = /terminos-y-condiciones
 ### Exclude a language from a route
 
 When translating a website, you may need to perform a progressive translation, route by route.
-It could also occur that some parts won't ever be localized (for example a blog).
+It could also occur that some parts won't be localized at all (for example a blog).
 
 For this purpose, you can remove a route for a specific language by setting it to `FALSE`:
 ```ini
