@@ -3,6 +3,8 @@
 
 This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) provides a URL-friendly mean to localize your web site/app.
 
+Demo: [here](http://ml.aesx.fr).
+
 * [Basic usage](#basic-usage)
 * [Root URL](#root-url)
 * [Advanced usage](#advanced-usage)
