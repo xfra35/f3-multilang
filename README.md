@@ -209,5 +209,5 @@ echo $ml->alias('captcha');// /captcha [global route]
 ## Potential improvements
 
 * Allow domain level recognition (mydomain.jp/es, or jp/es.mydomain.com)
-* Hook on "run" event if an event system is implemented on F3 [core](https://github.com/bcosca/fatfree-core).
+* Hook on "run" event if an event system is implemented in F3 [core](https://github.com/bcosca/fatfree-core).
 
