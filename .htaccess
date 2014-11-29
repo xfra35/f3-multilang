@@ -7,7 +7,7 @@ RewriteEngine On
 #
 # RewriteBase /
 
-RewriteRule ^lib|usr - [R=404]
+RewriteRule ^lib - [R=404]
 
 RewriteCond %{REQUEST_FILENAME} !-l
 RewriteCond %{REQUEST_FILENAME} !-f

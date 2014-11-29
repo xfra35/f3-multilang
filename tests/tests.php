@@ -6,7 +6,7 @@ class Tests {
 
     function run($f3) {
         $test=new \Test;
-        $f3->config('usr/cfg/app.ini');
+        $f3->config('tests/cfg/app.ini');
         $this->routes=$f3->get('ROUTES');//backup
         $this->aliases=$f3->get('ALIASES');//backup
         $ml=Multilang::instance();
