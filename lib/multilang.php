@@ -101,6 +101,18 @@ class Multilang extends \Prefab {
         return array_keys($this->languages);
     }
 
+	/**
+	 * Language-aware reroute (autoprefix unnamed routes)
+	 * @param string $url 
+	 * @param bool $permanent 
+	 * @return NULL
+	 */
+	function reroute($url=NULL,$permanent=FALSE) {
+		if (preg_match('/^\/([^\/]*)/',$url,$m) && !array_key_exists($m[1],$this->languages))
+			$url=rtrim('/'.$this->current.$url,'/');
+		$this->f3->reroute($url,$permanent);
+	}
+
     //! Detects the current language
     protected function detect($uri=NULL) {
         $this->current=$this->primary;

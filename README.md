@@ -11,6 +11,7 @@ Demo: [here](http://ml.aesx.fr).
     * [Rewrite URLs](#rewrite-urls)
     * [Exclude a language from a route](#exclude-a-language-from-a-route)
     * [Global routes](#global-routes)
+* [Note on rerouting](#note-on-rerouting)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -124,6 +125,47 @@ global = alias1, alias2, alias3
 **NB:** on a global route, the language is auto-detected by default.
 So in the case of a monolingual back office, you may need to force the language at the controller level.
 
+## Note on rerouting
+
+### If you're using named routes...
+
+`$f3->reroute` will work as expected, that is to say, it will reroute to the
+current language URL of the provided named route. E.g:
+
+```php
+$f3->reroute('@contact'); // OK => reroute to /xx/contact where xx is the current language
+```
+
+### If you're using unnamed routes...
+
+In that case, you have to provide a language-prefixed URL to `$f3->reroute`:
+
+```php
+$f3->reroute('/en/contact'); // OK
+$f3->reroute('/contact'); // Error => 404 Not Found
+```
+
+If you'd prefer to give the short URL to the framework and have it automatically prefix the URL with the current language,
+use the `$ml->reroute` method provided by the plugin:
+
+```php
+$ml->reroute('/en/contact'); // OK
+$ml->reroute('/contact'); // OK => reroute to /xx/contact where xx is the current language
+```
+
+In the situation where you'd like to quickly localize an existing project with unnamed routes, and would prefer to avoid
+having to rewrite every `$f3->reroute` into `$ml->reroute`, you can simply use the framework's `ONREROUTE` hook:
+
+```php
+$f3->set('ONREROUTE',function($url,$permanent) use($f3,$ml){
+  $f3->clear('ONREROUTE');
+  $ml->reroute($url,$permanent);
+});
+
+// then in your controller, existing reroutes will keep on working:
+$f3->reroute('/contact'); // OK => reroute to /xx/contact where xx is the current language
+```
+
 ## API
 
 ```php
@@ -199,11 +241,24 @@ $ml->isGlobal('captcha');// TRUE
 
 **Assemble url from alias name**
 
-This function is a language-aware version of the `$f3->alias()` function.
+This function is a language-aware version of `$f3->alias()`.
 
 ```php
 echo $ml->alias('terms',NULL,'es');// /es/terminos-y-condiciones [local route]
 echo $ml->alias('captcha');// /captcha [global route]
+```
+
+### reroute( $url=NULL, $permanent=FALSE )
+
+**Reroute to specified URI**
+
+This function is a language-aware version of `$f3->reroute()`.
+
+Use it if you want an automatic language prefix on **unnamed** routes. Cf. this [note](#note-on-rerouting).
+
+```php
+$ml->reroute('/en/contact'); // OK
+$ml->reroute('/contact'); // OK => reroute to /xx/contact where xx is the current language
 ```
 
 ## Potential improvements

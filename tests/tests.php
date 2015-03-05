@@ -114,6 +114,38 @@ class Tests {
                 $ml->alias('resize','format=big,file=foo.gif','it')==='/resize/big/foo.gif',
             'Alias function (global route)'
         );
+        //rerouting
+        $f3->set('ONREROUTE',function($url,$permanent) use($f3){
+            $f3->set('rerouted',$url);
+        });
+        $f3->clear('rerouted');
+        $ml->reroute('@blogEntry(slug=hallo-welt)');
+        $test->expect(
+            $f3->get('rerouted')=='/de/blog/hallo-welt',
+            'Reroute to a named rewritten route'
+        );
+        $f3->clear('rerouted');
+        $ml->reroute('@resize(format=big,file=foo.gif)');
+        $test->expect(
+            $f3->get('rerouted')=='/resize/big/foo.gif',
+            'Reroute to a named global route'
+        );
+		$ok=TRUE;
+		$reroutes=array(
+			NULL=>$f3->REALM,
+			'/'=>'/de',
+			'/blog/hallo-welt'=>'/de/blog/hallo-welt',
+			'/de/blog/hallo-welt'=>'/de/blog/hallo-welt',
+		);
+		foreach($reroutes as $url=>$expected) {
+			$f3->clear('rerouted');
+			$ml->reroute($url);
+			$ok=$ok && $f3->get('rerouted')==$expected;
+		}
+        $test->expect(
+            $ok,
+            'Reroute to any unnamed route (auto prefix)'
+        );
         //helper functions
         $test->expect(
             $ml->isGlobal('resize') && !$ml->isGlobal('blogEntry'),
