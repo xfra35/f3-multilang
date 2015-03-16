@@ -26,7 +26,9 @@ class Multilang extends \Prefab {
         //! primary language
         $primary,
         //! auto-detected language
-        $auto=FALSE;
+        $auto=FALSE,
+        //! migration mode
+        $migrate=FALSE;
 
     protected
         //! available languages
@@ -136,6 +138,7 @@ class Multilang extends \Prefab {
     protected function rewrite() {
         $routes=array();
         $aliases=&$this->f3->ref('ALIASES');
+		$redirects=array();
         foreach($this->f3->get('ROUTES') as $old=>$data) {
             $route=current(current($data));//let's pick up any route just to get the URL name
             $name=@$route[3];//PHP 5.3 compatibility
@@ -150,6 +153,13 @@ class Multilang extends \Prefab {
                     }
                 }
                 $new=rtrim('/'.$this->current.($new),'/');
+				if ($this->migrate && $this->auto) {
+					$redir=$old;
+					if (isset($this->rules[$this->primary][$name]))
+						$redir=$this->rules[$this->primary][$name];
+					if ($redir!==FALSE)
+						$redirects[$old]=rtrim('/'.$this->primary.($redir),'/');
+				}
             }
             if (isset($routes[$new]))
                 user_error(sprintf(self::E_Duplicate,$new));
@@ -158,6 +168,8 @@ class Multilang extends \Prefab {
                 $aliases[$name]=$new;
         }
         $this->f3->set('ROUTES',$routes);
+		foreach($redirects as $old=>$new)
+			$this->f3->route('GET '.$old,function($f3)use($new){$f3->reroute($new,TRUE);});
     }
 
     //! Read-only public properties
@@ -192,6 +204,8 @@ class Multilang extends \Prefab {
         //global routes
         if (isset($config['global']))
             $this->global=is_array($config['global'])?$config['global']:array($config['global']);
+		//migration mode
+		$this->migrate=(bool)@$config['migrate'];
         //detect current language
         $this->detect();
         //rewrite existing routes

@@ -4,39 +4,41 @@ class Tests {
 
     private $routes,$aliases;//original backup
 
+	private $ml;
+
     function run($f3) {
         $test=new \Test;
         $f3->config('tests/cfg/app.ini');
         $this->routes=$f3->get('ROUTES');//backup
         $this->aliases=$f3->get('ALIASES');//backup
-        $ml=Multilang::instance();
+        $this->ml=new Multilang;
         //plugin configuration
         $test->expect(
-            $ml->languages()==array('fr','it','de','en'),
+            $this->ml->languages()==array('fr','it','de','en'),
             'Languages definition'
         );
         $test->expect(
-            $ml->primary=='fr' && $f3->get('FALLBACK')=='fr-FR,fr',
+            $this->ml->primary=='fr' && $f3->get('FALLBACK')=='fr-FR,fr',
             'Primary language and FALLBACK correctly set'
 
         );
         //language detection
         $browser='da-DK,it-IT,en';//simulate browser detection
-        $f3->set('LANGUAGE',$browser);
-        $this->simulate('/',$ml);
+        $f3->set('LANGUAGE',$browser);//reset browser language
+        $this->simulate('/');
         $test->expect(
-            $ml->auto && $ml->current=='it' && $f3->get('LANGUAGE')=='it-IT,it,fr-FR,fr',
+            $this->ml->auto && $this->ml->current=='it' && $f3->get('LANGUAGE')=='it-IT,it,fr-FR,fr',
             'Browser detected language'
         );
-        $this->simulate('/en/something',$ml);
+        $this->simulate('/en/something',$this->ml);
         $test->expect(
-            !$ml->auto && $ml->current=='en' && $f3->get('LANGUAGE')=='en,en-GB,fr-FR,fr',
+            !$this->ml->auto && $this->ml->current=='en' && $f3->get('LANGUAGE')=='en,en-GB,fr-FR,fr',
             'URL detected language'
         );
-        $f3->set('LANGUAGE',$browser);
-        $this->simulate('/da/noget',$ml);
+        $f3->set('LANGUAGE',$browser);//reset browser language
+        $this->simulate('/da/noget');
         $test->expect(
-            $ml->current=='it' && $f3->get('LANGUAGE')=='it-IT,it,fr-FR,fr',
+            $this->ml->current=='it' && $f3->get('LANGUAGE')=='it-IT,it,fr-FR,fr',
             'Unknown language (fallback on browser detection)'
         );
         //routes rewriting
@@ -76,7 +78,7 @@ class Tests {
                 $this->mock('/it/legal')=='Ciao da Italia legal',
             'Rewritten routes executed'
         );
-        $f3->set('LANGUAGE',$browser);
+        $f3->set('LANGUAGE',$browser);//reset browser language
         $test->expect(
             $this->mock('/resize/120x80/foo.gif')=='Ciao da Italia foo.gif',
             'Global route executed'
@@ -95,37 +97,54 @@ class Tests {
             $this->mock('/')=='it detected',
             'Custom root handler'
         );
+		$f3->clear('MULTILANG.root');
         //alias function
-        $this->simulate('/de/zehr-gut',$ml);//german URL
+        $this->simulate('/de/zehr-gut');//german URL
         $test->expect(
-            $ml->alias('blogEntry','slug=hallo-welt')=='/de/blog/hallo-welt',
+            $this->ml->alias('blogEntry','slug=hallo-welt')=='/de/blog/hallo-welt',
             'Alias function (current language)'
         );
         $test->expect(
-            $ml->alias('blogEntry','slug=hello-world','en')=='/en/blog/hello-world',
+            $this->ml->alias('blogEntry','slug=hello-world','en')=='/en/blog/hello-world',
             'Alias function (target language)'
         );
         $test->expect(
-            $ml->alias('blogEntry','slug=bonjour','fr')===FALSE,
+            $this->ml->alias('blogEntry','slug=bonjour','fr')===FALSE,
             'Alias function (ignored route)'
         );
         $test->expect(
-            $ml->alias('resize','format=big,file=foo.gif')==='/resize/big/foo.gif' &&
-                $ml->alias('resize','format=big,file=foo.gif','it')==='/resize/big/foo.gif',
+            $this->ml->alias('resize','format=big,file=foo.gif')==='/resize/big/foo.gif' &&
+                $this->ml->alias('resize','format=big,file=foo.gif','it')==='/resize/big/foo.gif',
             'Alias function (global route)'
         );
+		//migration mode
+        $f3->set('LANGUAGE',$browser);//reset browser language
+		$f3->set('MULTILANG.migrate',TRUE);
+        $f3->set('ONREROUTE',function($url,$permanent) use($f3){
+            echo "rerouted to $url";
+        });
+		$test->expect(
+			$this->mock('/faq')=='rerouted to /fr/foire-aux-questions',
+			'Migration mode: old URIs redirected to primary URIs'
+		);
+		$test->expect(
+			$this->mock('/')=='rerouted to /it',
+			'Migration mode: root not redirected to primary URI (see MULTILANG.root)'
+		);
+		$f3->set('MULTILANG.migrate',FALSE);
         //rerouting
+        $this->simulate('/de/zehr-gut');//german URL
         $f3->set('ONREROUTE',function($url,$permanent) use($f3){
             $f3->set('rerouted',$url);
         });
         $f3->clear('rerouted');
-        $ml->reroute('@blogEntry(slug=hallo-welt)');
+        $this->ml->reroute('@blogEntry(slug=hallo-welt)');
         $test->expect(
             $f3->get('rerouted')=='/de/blog/hallo-welt',
             'Reroute to a named rewritten route'
         );
         $f3->clear('rerouted');
-        $ml->reroute('@resize(format=big,file=foo.gif)');
+        $this->ml->reroute('@resize(format=big,file=foo.gif)');
         $test->expect(
             $f3->get('rerouted')=='/resize/big/foo.gif',
             'Reroute to a named global route'
@@ -139,7 +158,7 @@ class Tests {
 		);
 		foreach($reroutes as $url=>$expected) {
 			$f3->clear('rerouted');
-			$ml->reroute($url);
+			$this->ml->reroute($url);
 			$ok=$ok && $f3->get('rerouted')==$expected;
 		}
         $test->expect(
@@ -148,11 +167,11 @@ class Tests {
         );
         //helper functions
         $test->expect(
-            $ml->isGlobal('resize') && !$ml->isGlobal('blogEntry'),
+            $this->ml->isGlobal('resize') && !$this->ml->isGlobal('blogEntry'),
             'isGlobal()'
         );
         $test->expect(
-            $ml->isLocalized('blogEntry') && !$ml->isLocalized('blogEntry','fr'),
+            $this->ml->isLocalized('blogEntry') && !$this->ml->isLocalized('blogEntry','fr'),
             'isLocalized()'
         );
         $f3->set('results',$test->results());
@@ -163,21 +182,19 @@ class Tests {
         $this->simulate($url);
         ob_start();
         $f3->mock('GET '.$url);
-        return ob_end_clean();
+        return ob_get_clean();
     }
 
     /**
      * Simulate plugin behavior on a given URL
      * @param string $url
-     * @param mixed $ml
      */
-    private function simulate($url,&$ml=NULL) {
+    private function simulate($url) {
         $f3=\Base::instance();
         $_SERVER['REQUEST_URI']=\Base::instance()->get('BASE').$url;
         $f3->set('ROUTES',$this->routes);
         $f3->set('ALIASES',$this->aliases);
-        Registry::clear('Multilang');
-        $ml=Multilang::instance();
+		$this->ml=new Multilang;
     }
 
     function afterRoute($f3) {

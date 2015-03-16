@@ -11,7 +11,8 @@ Demo: [here](http://ml.aesx.fr).
     * [Rewrite URLs](#rewrite-urls)
     * [Exclude a language from a route](#exclude-a-language-from-a-route)
     * [Global routes](#global-routes)
-* [Note on rerouting](#note-on-rerouting)
+* [Rerouting](#rerouting)
+* [Migration mode](#migration-mode)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -125,7 +126,7 @@ global = alias1, alias2, alias3
 **NB:** on a global route, the language is auto-detected by default.
 So in the case of a monolingual back office, you may need to force the language at the controller level.
 
-## Note on rerouting
+## Rerouting
 
 ### If you're using named routes...
 
@@ -165,6 +166,16 @@ $f3->set('ONREROUTE',function($url,$permanent) use($f3,$ml){
 // then in your controller, existing reroutes will keep on working:
 $f3->reroute('/contact'); // OK => reroute to /xx/contact where xx is the current language
 ```
+
+## Migration mode
+
+When translating an existing monolingual site, it is often interesting to redirect the old monolingual URIs to the new multilingual ones.
+The plugin does it automatically for you if you set `MULTILANG.migrate` to `TRUE`.
+
+Example:
+
+* when migration mode is disabled, `/contact` throws a 404 error
+* when migration mode is enabled, `/contact` performs a 301 redirection to `/en/contact` (the primary language)
 
 ## API
 
@@ -254,7 +265,7 @@ echo $ml->alias('captcha');// /captcha [global route]
 
 This function is a language-aware version of `$f3->reroute()`.
 
-Use it if you want an automatic language prefix on **unnamed** routes. Cf. this [note](#note-on-rerouting).
+Use it if you want an automatic language prefix on **unnamed** routes. Cf. [rerouting](#rerouting).
 
 ```php
 $ml->reroute('/en/contact'); // OK
