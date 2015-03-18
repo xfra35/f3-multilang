@@ -57,11 +57,6 @@ class Tests {
             'ROUTES and ALIASES rewritten (custom)'
         );
         $test->expect(
-            !array_key_exists('/fr/resize/@format/@file',$routes) && array_key_exists('/resize/@format/@file',$routes) &&
-                !in_array('/fr/resize/@format/@file',$aliases) && in_array('/resize/@format/@file',$aliases),
-            'Global route not rewritten'
-        );
-        $test->expect(
             !array_key_exists('/fr/blog/@slug',$routes) && !array_key_exists('/blog/@slug',$routes) &&
                 !in_array('/fr/blog/@slug',$aliases) && !in_array('/blog/@slug',$aliases),
             'Exclusions (excluded language)'
@@ -72,6 +67,26 @@ class Tests {
                 in_array('/en/blog/@slug',$aliases) && !in_array('/blog/@slug',$aliases),
             'Exclusions (allowed language)'
         );
+        //Global routes
+        $test->expect(
+            !array_key_exists('/fr/resize/@format/@file',$routes) && array_key_exists('/resize/@format/@file',$routes) &&
+            !in_array('/fr/resize/@format/@file',$aliases) && in_array('/resize/@format/@file',$aliases),
+            'Global route not rewritten (alias)'
+        );
+        $f3->set('MULTILANG.global',array('resize','/blog'));
+        $this->simulate('/en/something');//english URL
+        $test->expect(
+            !array_key_exists('/en/blog/@slug',$routes) && array_key_exists('/blog/@slug',$routes) &&
+            !in_array('/en/blog/@slug',$aliases) && in_array('/blog/@slug',$aliases),
+            'Global route not rewritten (prefix)'
+        );
+        $f3->set('LANGUAGE',$browser);//reset browser language
+        $this->simulate('/blog/foo');
+        $test->expect(
+            $this->ml->current=='it',
+            'Language auto-detected on a global route'
+        );
+        $f3->set('MULTILANG.global','resize');
         //routes testing
         $test->expect(
             $this->mock('/fr/foire-aux-questions')=='Bonjour faq' &&
@@ -110,7 +125,7 @@ class Tests {
         );
         $test->expect(
             $this->ml->alias('blogEntry','slug=bonjour','fr')===FALSE,
-            'Alias function (ignored route)'
+            'Alias function (excluded route)'
         );
         $test->expect(
             $this->ml->alias('resize','format=big,file=foo.gif')==='/resize/big/foo.gif' &&

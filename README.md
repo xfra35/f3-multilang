@@ -120,8 +120,10 @@ They are defined using the `MULTILANG.global` variable:
 [MULTILANG]
 global = captcha
 ;could also be an array:
-global = alias1, alias2, alias3
+global = alias1, alias2, alias3, /admin, /foo/bar
 ```
+
+Each entry can be a route alias or a URI prefix.
 
 **NB:** on a global route, the language is auto-detected by default.
 So in the case of a monolingual back office, you may need to force the language at the controller level.

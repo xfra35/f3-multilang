@@ -38,7 +38,9 @@ class Multilang extends \Prefab {
         //! language-specific rules
         $rules=array(),
         //! aliases of global routes
-        $global=array();
+        $global_aliases=array(),
+        //! regex for global routes
+        $global_regex=NULL;
 
     /** @var \Base */
     private $f3;
@@ -51,7 +53,7 @@ class Multilang extends \Prefab {
      * @return string|FALSE
      */
     function alias($name,$params=NULL,$lang=NULL) {
-        if (in_array($name,$this->global))
+        if (in_array($name,$this->global_aliases))
             return $this->f3->alias($name,$params);
         $params=$params?$this->f3->parse($params):array();
         if (!$lang)
@@ -71,7 +73,7 @@ class Multilang extends \Prefab {
      * @return bool
      */
     function isGlobal($name) {
-        return in_array($name,$this->global);
+        return in_array($name,$this->global_aliases);
     }
 
     /**
@@ -143,7 +145,8 @@ class Multilang extends \Prefab {
             $route=current(current($data));//let's pick up any route just to get the URL name
             $name=@$route[3];//PHP 5.3 compatibility
             $new=$old;
-            if (!in_array($name,$this->global)) {
+            if (!($name && in_array($name,$this->global_aliases)
+                || isset($this->global_regex) && preg_match($this->global_regex,$old))) {
                 if (isset($this->rules[$this->current][$name])) {
                     $new=$this->rules[$this->current][$name];
                     if ($new===FALSE) {
@@ -202,8 +205,18 @@ class Multilang extends \Prefab {
             foreach($config['rules'] as $lang=>$aliases)
                 $this->rules[$lang]=$aliases;
         //global routes
-        if (isset($config['global']))
-            $this->global=is_array($config['global'])?$config['global']:array($config['global']);
+        if (isset($config['global'])) {
+            if (!is_array($config['global']))
+                $config['global']=array($config['global']);
+            $prefixes=array();
+            foreach($config['global'] as $global)
+                if (@$global[0]=='/')
+                    $prefixes[]=$global;
+                else
+                    $this->global_aliases[]=$global;
+            if ($prefixes)
+                $this->global_regex='#^('.implode('|',array_map('preg_quote',$prefixes)).')#';
+        }
 		//migration mode
 		$this->migrate=(bool)@$config['migrate'];
         //detect current language
