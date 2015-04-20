@@ -46,14 +46,14 @@ class Tests {
 		$aliases=&$f3->ref('ALIASES');
 		$this->simulate('/de/etwas');//german URL
 		$test->expect(
-			array_keys($routes)==array('/de','/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/') &&
-				array_values($aliases)==array('/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file'),
+			array_keys($routes)==array('/de','/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*','/') &&
+				array_values($aliases)==array('/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*'),
 			'ROUTES and ALIASES rewritten (auto)'
 		);
 		$this->simulate('/fr/quelque-chose');//french URL
 		$test->expect(
-			array_keys($routes)==array('/fr','/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/') &&
-				array_values($aliases)==array('/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file'),
+			array_keys($routes)==array('/fr','/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*','/') &&
+				array_values($aliases)==array('/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*'),
 			'ROUTES and ALIASES rewritten (custom)'
 		);
 		$test->expect(
@@ -139,7 +139,8 @@ class Tests {
 			echo "rerouted to $url";
 		});
 		$test->expect(
-			$this->mock('/faq')=='rerouted to /fr/foire-aux-questions',
+			$this->mock('/faq')=='rerouted to /fr/foire-aux-questions' &&
+			$this->mock('/foo/bar/path/to/log')=='rerouted to /fr/foo/bar/path/to/log',
 			'Migration mode: old URIs redirected to primary URIs'
 		);
 		$test->expect(
