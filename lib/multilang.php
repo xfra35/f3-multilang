@@ -63,7 +63,7 @@ class Multilang extends \Prefab {
 		$url=isset($this->rules[$lang][$name])?
 			$this->rules[$lang][$name]:@$this->_aliases[$name];
 		if (!$url)
-			user_error(sprintf(\Base::E_Named,$name));
+			user_error(sprintf(\Base::E_Named,$name),E_USER_ERROR);
 		return $this->f3->build(rtrim('/'.$lang.$url,'/'),$params);
 	}
 
@@ -165,7 +165,7 @@ class Multilang extends \Prefab {
 				}
 			}
 			if (isset($routes[$new]))
-				user_error(sprintf(self::E_Duplicate,$new));
+				user_error(sprintf(self::E_Duplicate,$new),E_USER_ERROR);
 			$routes[$new]=$data;
 			if (isset($aliases[$name]))
 				$aliases[$name]=$new;
@@ -188,7 +188,7 @@ class Multilang extends \Prefab {
 		$config=$this->f3->get('MULTILANG');
 		//languages definition
 		if (!is_array(@$config['languages']))
-			user_error(self::E_NoLang);
+			user_error(self::E_NoLang,E_USER_ERROR);
 		foreach($config['languages'] as $lang=>$locales) {
 			if (is_array($locales))
 				$locales=implode(',',$locales);
