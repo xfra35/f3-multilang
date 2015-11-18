@@ -210,6 +210,17 @@ echo $ml->auto;//FALSE
 ```
 
 
+### locale()
+
+**Return the currently selected locale**
+
+NB: the value returned by this function can be different from what you're expecting
+if the locales configured in `MULTILANG.languages` are not present on your system.
+
+```php
+echo $ml->locale();// en_GB.UTF-8
+```
+
 ### languages()
 
 **Return the list of available languages**

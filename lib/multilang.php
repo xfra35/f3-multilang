@@ -90,6 +90,14 @@ class Multilang extends \Prefab {
 	}
 
 	/**
+	 * Return the current locale
+	 * @return string
+	 */
+	function locale() {
+		return setlocale(LC_NUMERIC,0);// LC_ALL does not always return a unique locale
+	}
+
+	/**
 	 * Return the list of available aliases
 	 * @return array
 	 */
