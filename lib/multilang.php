@@ -98,6 +98,16 @@ class Multilang extends \Prefab {
 	}
 
 	/**
+	 * Return the language name corresponding to the given ISO code
+	 * NB: the name is localized if the intl extension is installed, otherwise it is returned in English
+	 * @param string $iso
+	 * @return string
+	 */
+	function display($iso) {
+		return class_exists('Locale')?\Locale::getDisplayLanguage($iso,$this->locale()):constant('ISO::LC_'.$iso);
+	}
+
+	/**
 	 * Return the list of available aliases
 	 * @return array
 	 */

@@ -184,11 +184,16 @@ class Tests {
 		//helper functions
 		$test->expect(
 			$this->ml->isGlobal('resize') && !$this->ml->isGlobal('blogEntry'),
-			'isGlobal()'
+			'Check if a route is global'
 		);
 		$test->expect(
 			$this->ml->isLocalized('blogEntry') && !$this->ml->isLocalized('blogEntry','fr'),
-			'isLocalized()'
+			'Check if a route is localized'
+		);
+		$intl=class_exists('Locale');
+		$test->expect(
+			$this->ml->display('fr')==($intl?'Französisch':'French'),
+			sprintf('Display a language name (%s intl extension)',$intl?'with':'without')
 		);
 		$f3->set('results',$test->results());
 	}
