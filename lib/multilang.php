@@ -104,6 +104,8 @@ class Multilang extends \Prefab {
 	 * @return string
 	 */
 	function display($iso) {
+		if (!$iso)
+			return '';
 		return class_exists('Locale')?\Locale::getDisplayLanguage($iso,$this->locale()):constant('ISO::LC_'.$iso);
 	}
 
