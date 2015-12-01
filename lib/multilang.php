@@ -48,14 +48,15 @@ class Multilang extends \Prefab {
 	/**
 	 * Assemble url from alias name
 	 * @param string $name
-	 * @param array $params
+	 * @param array|string $params
 	 * @param string $lang
 	 * @return string|FALSE
 	 */
 	function alias($name,$params=NULL,$lang=NULL) {
 		if (in_array($name,$this->global_aliases))
 			return $this->f3->alias($name,$params);
-		$params=$params?$this->f3->parse($params):array();
+		if (!is_array($params))
+			$params=$this->f3->parse($params);
 		if (!$lang)
 			$lang=$this->current;
 		if (isset($this->rules[$lang][$name]) && $this->rules[$lang][$name]===FALSE)
