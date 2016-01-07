@@ -221,7 +221,7 @@ if the locales configured in `MULTILANG.languages` are not present on your syste
 echo $ml->locale();// en_GB.UTF-8
 ```
 
-### display( $iso )
+### displayLanguage( $iso )
 
 **Return the language name corresponding to the given ISO code**
 
@@ -237,6 +237,27 @@ echo $ml->display('fr');// французский
 // on any route (without intl)
 echo $ml->display('fr');// French
 ```
+
+### displayCountry( $iso )
+
+**Return the country name corresponding to the given ISO code**
+
+NB: the name is localized if the intl extension is installed, otherwise it is returned in English.
+
+```php
+// on a Danish route (with intl)
+echo $ml->display('ru');// Rusland
+
+// on a Russian route (with intl)
+echo $ml->display('ru');// Россия
+
+// on any route (without intl)
+echo $ml->display('ru');// Russia
+```
+
+### display( $iso )
+
+**Alias for displayLanguage( $iso ) [deprecated]**
 
 ### languages()
 

@@ -104,10 +104,31 @@ class Multilang extends \Prefab {
 	 * @param string $iso
 	 * @return string
 	 */
-	function display($iso) {
+	function displayLanguage($iso) {
 		if (!$iso)
 			return '';
 		return class_exists('Locale')?\Locale::getDisplayLanguage($iso,$this->locale()):constant('ISO::LC_'.$iso);
+	}
+
+	/**
+	 * Return the country name corresponding to the given ISO code
+	 * NB: the name is localized if the intl extension is installed, otherwise it is returned in English
+	 * @param string $iso
+	 * @return string
+	 */
+	function displayCountry($iso) {
+		if (!$iso)
+			return '';
+		return class_exists('Locale')?\Locale::getDisplayRegion('-'.$iso,$this->locale()):constant('ISO::CC_'.$iso);
+	}
+
+	/**
+	 * Alias for displayLanguage [deprecated]
+	 * @param string $iso
+	 * @return string
+	 */
+	function display($iso) {
+		return $this->displayLanguage($iso);
 	}
 
 	/**

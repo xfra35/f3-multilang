@@ -192,8 +192,12 @@ class Tests {
 		);
 		$intl=class_exists('Locale');
 		$test->expect(
-			$this->ml->display('fr')==($intl?'Französisch':'French'),
+			$this->ml->displayLanguage('fr')==($intl?'Französisch':'French'),
 			sprintf('Display a language name (%s intl extension)',$intl?'with':'without')
+		);
+		$test->expect(
+			$this->ml->displayCountry('fr')==($intl?'Frankreich':'France'),
+			sprintf('Display a country name (%s intl extension)',$intl?'with':'without')
 		);
 		$f3->set('results',$test->results());
 	}
