@@ -229,7 +229,7 @@ class Multilang extends \Prefab {
 		$this->f3=\Base::instance();
 		$config=$this->f3->get('MULTILANG');
 		//languages definition
-		if (!is_array(@$config['languages']))
+		if (!isset($config['languages']) || !$config['languages'])
 			user_error(self::E_NoLang,E_USER_ERROR);
 		foreach($config['languages'] as $lang=>$locales) {
 			if (is_array($locales))
