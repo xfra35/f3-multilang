@@ -221,7 +221,7 @@ class Multilang extends \Prefab {
 	function __get($name) {
 		if (in_array($name,array('current','primary','auto')))
 			return $this->$name;
-		trigger_error(sprintf(self::E_Undefined,__CLASS__,$name));
+		user_error(sprintf(self::E_Undefined,__CLASS__,$name),E_USER_ERROR);
 	}
 
 	//! Bootstrap
