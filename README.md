@@ -229,13 +229,13 @@ NB: the name is localized if the intl extension is installed, otherwise it is re
 
 ```php
 // on a Danish route (with intl)
-echo $ml->display('fr');// fransk
+echo $ml->displayLanguage('fr');// fransk
 
 // on a Russian route (with intl)
-echo $ml->display('fr');// французский
+echo $ml->displayLanguage('fr');// французский
 
 // on any route (without intl)
-echo $ml->display('fr');// French
+echo $ml->displayLanguage('fr');// French
 ```
 
 ### displayCountry( $iso )
@@ -246,13 +246,13 @@ NB: the name is localized if the intl extension is installed, otherwise it is re
 
 ```php
 // on a Danish route (with intl)
-echo $ml->display('ru');// Rusland
+echo $ml->displayCountry('ru');// Rusland
 
 // on a Russian route (with intl)
-echo $ml->display('ru');// Россия
+echo $ml->displayCountry('ru');// Россия
 
 // on any route (without intl)
-echo $ml->display('ru');// Russia
+echo $ml->displayCountry('ru');// Russia
 ```
 
 ### display( $iso )
