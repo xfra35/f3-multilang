@@ -148,6 +148,14 @@ class Multilang extends \Prefab {
 	}
 
 	/**
+	 * Return the list of available locales (indexed by languages)
+	 * @return array
+	 */
+	function locales() {
+		return $this->languages;
+	}
+
+	/**
 	 * Language-aware reroute (autoprefix unnamed routes)
 	 * @param string $url 
 	 * @param bool $permanent 

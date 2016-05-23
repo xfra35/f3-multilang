@@ -267,6 +267,19 @@ echo $ml->displayCountry('ru');// Russia
 $ml->languages();// array('en','ja','es')
 ```
 
+### locales()
+
+**Return the list of available locales (indexed by languages)**
+
+```php
+$ml->locales();
+/* array(
+    'en' => 'en-GB,en-US,en',
+    'ja' => 'ja-JP,ja',
+    'es' => 'es-ES,es'
+)*/
+```
+
 ### aliases()
 
 **Return the list of all aliases**
