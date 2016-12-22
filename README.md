@@ -320,6 +320,7 @@ This function is a language-aware version of `$f3->alias()`.
 
 ```php
 echo $ml->alias('terms',NULL,'es');// /es/terminos-y-condiciones [local route]
+echo $ml->alias('profile',array('action'=>'edit'),$ml->current); [token route]
 echo $ml->alias('captcha');// /captcha [global route]
 ```
 
