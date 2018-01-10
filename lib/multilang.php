@@ -28,7 +28,9 @@ class Multilang extends \Prefab {
 		//! auto-detected language
 		$auto=FALSE,
 		//! migration mode
-		$migrate=FALSE;
+		$migrate=FALSE,
+		//! strict mode
+		$strict=TRUE;
 
 	protected
 		//! available languages
@@ -214,7 +216,7 @@ class Multilang extends \Prefab {
 						$redirects[$old]=rtrim('/'.$this->primary.($redir),'/');
 				}
 			}
-			if (isset($routes[$new]))
+			if (isset($routes[$new]) && $this->strict)
 				user_error(sprintf(self::E_Duplicate,$new),E_USER_ERROR);
 			$routes[$new]=$data;
 			if (isset($aliases[$name]))
@@ -268,7 +270,11 @@ class Multilang extends \Prefab {
 				$this->global_regex='#^('.implode('|',array_map('preg_quote',$prefixes)).')#';
 		}
 		//migration mode
-		$this->migrate=(bool)@$config['migrate'];
+		if (isset($config['migrate']))
+				$this->migrate=(bool)$config['migrate'];
+		//strict mode
+		if (isset($config['strict']))
+				$this->strict=(bool)$config['strict'];
 		//detect current language
 		$this->detect();
 		//rewrite existing routes

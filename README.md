@@ -13,6 +13,7 @@ Demo: [here](http://ml.aesx.fr).
     * [Global routes](#global-routes)
 * [Rerouting](#rerouting)
 * [Migration mode](#migration-mode)
+* [Strict mode](#strict-mode)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -178,6 +179,20 @@ Example:
 
 * when migration mode is disabled, `/contact` throws a 404 error
 * when migration mode is enabled, `/contact` performs a 301 redirection to `/en/contact` (the primary language)
+
+## Strict mode
+
+When URLs are rewritten, an error is thrown if duplicate URLs are detected. E.g:
+
+```ini
+[MULTILANG.rules.en]
+contact = /contact
+blog = /contact
+```
+
+This behaviour is called "strict mode" and is enabled by default.
+
+You can disable it by setting `MULTILANG.strict` to `FALSE`, in which case no error will be thrown.
 
 ## API
 
