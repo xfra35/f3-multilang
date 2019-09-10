@@ -14,6 +14,7 @@ Demo: [here](http://ml.aesx.fr).
 * [Rerouting](#rerouting)
 * [Migration mode](#migration-mode)
 * [Strict mode](#strict-mode)
+* [Passthru mode](#passthru-mode)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -193,6 +194,20 @@ blog = /contact
 This behaviour is called "strict mode" and is enabled by default.
 
 You can disable it by setting `MULTILANG.strict` to `FALSE`, in which case no error will be thrown.
+
+## Passthru mode
+
+When starting a new monolingual project, it may be interesting to keep the dependency to the Multilang plugin
+while not altering routes, just in case one day the project turns multilingual.
+
+The `passthru` mode is meant for this situation. Set `MULTILANG.passthru` to `TRUE` to enable it.
+
+When the passthru mode is enabled, the plugin doesn't do much:
+
+* it reads the `MULTILANG` configuration variable
+* it sets `$f3->LANGUAGE` accordingly to the primary language
+* it leaves the framework routes untouched
+* it provides its usual public methods and properties
 
 ## API
 

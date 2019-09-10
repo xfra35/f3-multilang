@@ -199,6 +199,17 @@ class Tests {
 			$this->ml->displayCountry('fr')==($intl?'Frankreich':'France'),
 			sprintf('Display a country name (%s intl extension)',$intl?'with':'without')
 		);
+		//passthru mode
+		$f3->set('MULTILANG.passthru',TRUE);
+		$test->expect(
+			$this->mock('/')=='Bonjour home' && $this->mock('/legal')=='Bonjour legal' &&
+			$this->mock('/fr/legal')=='404' && $this->mock('/fr/mentions-legales')==404,
+			'Passthru mode: route rewriting is disabled and the primary language is selected');
+		$test->expect(
+			$this->ml->primary=='fr' && $this->ml->current==$this->ml->primary && $this->ml->alias('legal')=='/legal' &&
+			$this->ml->isGlobal('faq') && !$this->ml->isLocalized('faq'),
+			'Passthru mode: public methods and properties return consistent results'
+		);
 		$f3->set('results',$test->results());
 	}
 
@@ -206,7 +217,13 @@ class Tests {
 		$f3=Base::instance();
 		$this->simulate($url);
 		ob_start();
+		$f3->HALT=FALSE;
+		$f3->ONERROR=function($f3){
+			echo $f3->ERROR['code'];
+		};
 		$f3->mock('GET '.$url);
+		$f3->ONERROR=NULL;
+		$f3->HALT=TRUE;
 		return ob_get_clean();
 	}
 

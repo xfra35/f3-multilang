@@ -30,7 +30,9 @@ class Multilang extends \Prefab {
 		//! migration mode
 		$migrate=FALSE,
 		//! strict mode
-		$strict=TRUE;
+		$strict=TRUE,
+		//! passthru mode
+		$passthru=FALSE;
 
 	protected
 		//! available languages
@@ -55,7 +57,7 @@ class Multilang extends \Prefab {
 	 * @return string|FALSE
 	 */
 	function alias($name,$params=NULL,$lang=NULL) {
-		if (in_array($name,$this->global_aliases))
+		if ($this->isGlobal($name))
 			return $this->f3->alias($name,$params);
 		if (!is_array($params))
 			$params=$this->f3->parse($params);
@@ -76,7 +78,7 @@ class Multilang extends \Prefab {
 	 * @return bool
 	 */
 	function isGlobal($name) {
-		return in_array($name,$this->global_aliases);
+		return $this->passthru || in_array($name,$this->global_aliases);
 	}
 
 	/**
@@ -164,7 +166,7 @@ class Multilang extends \Prefab {
 	 * @return NULL
 	 */
 	function reroute($url=NULL,$permanent=FALSE) {
-		if (preg_match('/^\/([^\/]*)/',$url,$m) && !array_key_exists($m[1],$this->languages))
+		if (!$this->passthru && preg_match('/^\/([^\/]*)/',$url,$m) && !array_key_exists($m[1],$this->languages))
 			$url=rtrim('/'.$this->current.$url,'/');
 		$this->f3->reroute($url,$permanent);
 	}
@@ -253,35 +255,44 @@ class Multilang extends \Prefab {
 		}
 		//aliases definition
 		$this->_aliases=$this->f3->get('ALIASES');
-		if (is_array(@$config['rules']))
-			foreach($config['rules'] as $lang=>$aliases)
-				$this->rules[$lang]=$aliases;
-		//global routes
-		if (isset($config['global'])) {
-			if (!is_array($config['global']))
-				$config['global']=array($config['global']);
-			$prefixes=array();
-			foreach($config['global'] as $global)
-				if (@$global[0]=='/')
-					$prefixes[]=$global;
-				else
-					$this->global_aliases[]=$global;
-			if ($prefixes)
-				$this->global_regex='#^('.implode('|',array_map('preg_quote',$prefixes)).')#';
-		}
-		//migration mode
-		if (isset($config['migrate']))
+		//passthru mode
+		if (isset($config['passthru']))
+			$this->passthru=(bool)$config['passthru'];
+		if ($this->passthru) {
+			// select the primary language
+			$this->f3->set('LANGUAGE',$this->languages[$this->current=$this->primary]);
+		} else {
+			//rewriting rules
+			if (is_array(@$config['rules']))
+				foreach($config['rules'] as $lang=>$aliases)
+					$this->rules[$lang]=$aliases;
+			//global routes
+			if (isset($config['global'])) {
+				if (!is_array($config['global']))
+					$config['global']=array($config['global']);
+				$prefixes=array();
+				foreach($config['global'] as $global)
+					if (@$global[0]=='/')
+						$prefixes[]=$global;
+					else
+						$this->global_aliases[]=$global;
+				if ($prefixes)
+					$this->global_regex='#^('.implode('|',array_map('preg_quote',$prefixes)).')#';
+			}
+			//migration mode
+			if (isset($config['migrate']))
 				$this->migrate=(bool)$config['migrate'];
-		//strict mode
-		if (isset($config['strict']))
+			//strict mode
+			if (isset($config['strict']))
 				$this->strict=(bool)$config['strict'];
-		//detect current language
-		$this->detect();
-		//rewrite existing routes
-		$this->rewrite();
-		//root handler
-		$self=$this;//PHP 5.3 compatibility
-		$this->f3->route('GET /',@$config['root']?:function($f3) use($self){$f3->reroute('/'.$self->current);});
+			//detect current language
+			$this->detect();
+			//rewrite existing routes
+			$this->rewrite();
+			//root handler
+			$self=$this;//PHP 5.3 compatibility
+			$this->f3->route('GET /',@$config['root']?:function($f3) use($self){$f3->reroute('/'.$self->current);});
+		}
 	}
 
 }
