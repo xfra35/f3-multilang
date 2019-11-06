@@ -231,7 +231,7 @@ class Multilang extends \Prefab {
 
 	//! Read-only public properties
 	function __get($name) {
-		if (in_array($name,array('current','primary','auto')))
+		if (in_array($name,array('current','primary','auto','passthru')))
 			return $this->$name;
 		user_error(sprintf(self::E_Undefined,__CLASS__,$name),E_USER_ERROR);
 	}

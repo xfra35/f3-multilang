@@ -239,6 +239,13 @@ echo $ml->primary;// en
 echo $ml->auto;//FALSE
 ```
 
+### passthru
+
+**TRUE if passthru mode is enabled**
+
+```php
+echo $ml->passthru;//FALSE
+```
 
 ### locale()
 
