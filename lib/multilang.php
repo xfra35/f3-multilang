@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Multilang: a localization plugin for the PHP Fat-Free Framework
  *
@@ -32,7 +31,9 @@ class Multilang extends \Prefab {
 		//! strict mode
 		$strict=TRUE,
 		//! passthru mode
-		$passthru=FALSE;
+		$passthru=FALSE,
+		//! hide subfolder for main language
+		$hide=FALSE;
 
 	protected
 		//! available languages
@@ -161,8 +162,8 @@ class Multilang extends \Prefab {
 
 	/**
 	 * Language-aware reroute (autoprefix unnamed routes)
-	 * @param string $url 
-	 * @param bool $permanent 
+	 * @param string $url
+	 * @param bool $permanent
 	 * @return NULL
 	 */
 	function reroute($url=NULL,$permanent=FALSE) {
@@ -172,12 +173,15 @@ class Multilang extends \Prefab {
 	}
 
 	//! Detects the current language
-	protected function detect($uri=NULL) {
-		$this->current=$this->primary;
-		if (preg_match('/^'.preg_quote($this->f3->get('BASE'),'/').'\/([^\/?]+)([\/?]|$)/',$uri?:$_SERVER['REQUEST_URI'],$m) &&
-				array_key_exists($m[1],$this->languages))
-			$this->current=$m[1];
-		else {//auto-detect language
+protected function detect($uri=NULL) {
+	$this->current=$this->primary;
+	if (preg_match('/^'.preg_quote($this->f3->get('BASE'),'/').'\/([^\/?]+)([\/?]|$)/',$uri?:$_SERVER['REQUEST_URI'],$m) &&
+			array_key_exists($m[1],$this->languages))
+		$this->current=$m[1];
+	else {//auto-detect language
+		if($this->auto==FALSE && $this->hide==TRUE)
+			$this->current = $this->primary;
+		else {
 			$this->auto=TRUE;
 			$detected=array_intersect(explode(',',$this->f3->get('LANGUAGE')),explode(',',implode(',',$this->languages)));
 			if ($detected=reset($detected))
@@ -187,43 +191,54 @@ class Multilang extends \Prefab {
 						break;
 					}
 		}
-		$this->f3->set('LANGUAGE',$this->languages[$this->current]);
 	}
+	$this->f3->set('LANGUAGE',$this->languages[$this->current]);
+}
 
 	//! Rewrite ROUTES and ALIASES
 	protected function rewrite() {
 		$routes=array();
 		$aliases=&$this->f3->ref('ALIASES');
 		$redirects=array();
-		foreach($this->f3->get('ROUTES') as $old=>$data) {
-			$route=current(current($data));//let's pick up any route just to get the URL name
-			$name=@$route[3];//PHP 5.3 compatibility
-			$new=$old;
-			if (!($name && in_array($name,$this->global_aliases)
-				|| isset($this->global_regex) && preg_match($this->global_regex,$old))) {
-				if (isset($this->rules[$this->current][$name])) {
-					$new=$this->rules[$this->current][$name];
-					if ($new===FALSE) {
-						if (isset($aliases[$name]))
-							unset($aliases[$name]);
-						continue;
+		$f3_routes = $this->f3->get('ROUTES');
+
+		if($this->current == $this->primary && $this->hide==TRUE)
+			$routes = $f3_routes;
+		else {
+			foreach($f3_routes as $old=>$data) {
+
+				$route=current(current($data));//let's pick up any route just to get the URL name
+				$name=@$route[3];//PHP 5.3 compatibility
+				$new=$old;
+
+				if (!($name && in_array($name,$this->global_aliases)
+					|| isset($this->global_regex) && preg_match($this->global_regex,$old))) {
+					if (isset($this->rules[$this->current][$name])) {
+						$new=$this->rules[$this->current][$name];
+						if ($new===FALSE) {
+							if (isset($aliases[$name]))
+								unset($aliases[$name]);
+							continue;
+						}
+					}
+					$new=rtrim('/'.$this->current.($new),'/');
+
+					if ($this->migrate && $this->auto) {
+						$redir=$old;
+						if (isset($this->rules[$this->primary][$name]))
+							$redir=$this->rules[$this->primary][$name];
+						if ($redir!==FALSE)
+							$redirects[$old]=rtrim('/'.$this->primary.($redir),'/');
 					}
 				}
-				$new=rtrim('/'.$this->current.($new),'/');
-				if ($this->migrate && $this->auto) {
-					$redir=$old;
-					if (isset($this->rules[$this->primary][$name]))
-						$redir=$this->rules[$this->primary][$name];
-					if ($redir!==FALSE)
-						$redirects[$old]=rtrim('/'.$this->primary.($redir),'/');
-				}
+				if (isset($routes[$new]) && $this->strict)
+					user_error(sprintf(self::E_Duplicate,$new),E_USER_ERROR);
+				$routes[$new]=$data;
+				if (isset($aliases[$name]))
+					$aliases[$name]=$new;
 			}
-			if (isset($routes[$new]) && $this->strict)
-				user_error(sprintf(self::E_Duplicate,$new),E_USER_ERROR);
-			$routes[$new]=$data;
-			if (isset($aliases[$name]))
-				$aliases[$name]=$new;
 		}
+
 		$this->f3->set('ROUTES',$routes);
 		foreach($redirects as $old=>$new)
 			$this->f3->route('GET '.$old,function($f3)use($new){$f3->reroute($new,TRUE);});
@@ -285,6 +300,9 @@ class Multilang extends \Prefab {
 			//strict mode
 			if (isset($config['strict']))
 				$this->strict=(bool)$config['strict'];
+			//passthru mode
+			if (isset($config['hide']))
+				$this->hide=(bool)$config['hide'];
 			//detect current language
 			$this->detect();
 			//rewrite existing routes
