@@ -112,7 +112,7 @@ class Multilang extends \Prefab {
 	function displayLanguage($iso) {
 		if (!$iso)
 			return '';
-		return class_exists('Locale')?\Locale::getDisplayLanguage($iso,$this->locale()):constant('ISO::LC_'.$iso);
+		return class_exists('Locale')?\Locale::getDisplayLanguage($iso,$this->current):constant('ISO::LC_'.$iso);
 	}
 
 	/**
@@ -124,7 +124,7 @@ class Multilang extends \Prefab {
 	function displayCountry($iso) {
 		if (!$iso)
 			return '';
-		return class_exists('Locale')?\Locale::getDisplayRegion('-'.$iso,$this->locale()):constant('ISO::CC_'.$iso);
+		return class_exists('Locale')?\Locale::getDisplayRegion('-'.$iso,$this->current):constant('ISO::CC_'.$iso);
 	}
 
 	/**
