@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Multilang: a localization plugin for the PHP Fat-Free Framework
  *
@@ -70,7 +71,10 @@ class Multilang extends \Prefab {
 			$this->rules[$lang][$name]:@$this->_aliases[$name];
 		if (!$url)
 			user_error(sprintf(\Base::E_Named,$name),E_USER_ERROR);
-		return $this->f3->build(rtrim('/'.$lang.$url,'/'),$params);
+
+		$root_folder = ($lang == $this->primary && $this->hide) ? '' : '/'.$lang;
+
+		return $this->f3->build(rtrim($root_folder.$url,'/'),$params);
 	}
 
 	/**
@@ -124,7 +128,7 @@ class Multilang extends \Prefab {
 	function displayCountry($iso) {
 		if (!$iso)
 			return '';
-		return class_exists('Locale')?\Locale::getDisplayRegion('-'.$iso,$this->current):constant('ISO::CC_'.$iso);
+		return class_exists('Locale')?\Locale::getDisplayRegion('-'.$iso, $this->current):constant('ISO::CC_'.$iso);
 	}
 
 	/**
