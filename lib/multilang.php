@@ -16,7 +16,7 @@ class Multilang extends \Prefab {
 	//@{ Error messages
 	const
 		E_NoLang='Configuration error. No language has been defined!',
-		E_Duplicate='Cannot rewrite: the URL %s is already in use!',
+		E_Duplicate='Cannot rewrite: the URL `%s` is already in use!',
 		E_Undefined='Undefined property: %s::$%s';
 	//@}
 
@@ -55,6 +55,7 @@ class Multilang extends \Prefab {
 	 * @param array|string $params
 	 * @param string $lang
 	 * @return string|FALSE
+     * @throws \Exception
 	 */
 	function alias($name,$params=NULL,$lang=NULL) {
 		if ($this->isGlobal($name))
@@ -68,7 +69,7 @@ class Multilang extends \Prefab {
 		$url=isset($this->rules[$lang][$name])?
 			$this->rules[$lang][$name]:@$this->_aliases[$name];
 		if (!$url)
-			user_error(sprintf(\Base::E_Named,$name),E_USER_ERROR);
+			throw new \Exception(sprintf(\Base::E_Named,$name));
 		return $this->f3->build(rtrim('/'.$lang.$url,'/'),$params);
 	}
 
@@ -190,7 +191,11 @@ class Multilang extends \Prefab {
 		$this->f3->set('LANGUAGE',$this->languages[$this->current]);
 	}
 
-	//! Rewrite ROUTES and ALIASES
+    /**
+     * Rewrite ROUTES and ALIASES
+     * @return void
+     * @throws \Exception
+     */
 	protected function rewrite() {
 		$routes=array();
 		$aliases=&$this->f3->ref('ALIASES');
@@ -219,7 +224,7 @@ class Multilang extends \Prefab {
 				}
 			}
 			if (isset($routes[$new]) && $this->strict)
-				user_error(sprintf(self::E_Duplicate,$new),E_USER_ERROR);
+				throw new \Exception(sprintf(self::E_Duplicate,$new));
 			$routes[$new]=$data;
 			if (isset($aliases[$name]))
 				$aliases[$name]=$new;
@@ -229,20 +234,28 @@ class Multilang extends \Prefab {
 			$this->f3->route('GET '.$old,function($f3)use($new){$f3->reroute($new,TRUE);});
 	}
 
-	//! Read-only public properties
+    /**
+     * Read-only public properties
+     * @param string $name
+     * @return mixed
+     * @throws \Exception
+     */
 	function __get($name) {
 		if (in_array($name,array('current','primary','auto','passthru')))
 			return $this->$name;
-		user_error(sprintf(self::E_Undefined,__CLASS__,$name),E_USER_ERROR);
+		throw new \Exception(sprintf(self::E_Undefined,__CLASS__,$name));
 	}
 
-	//! Bootstrap
+    /**
+     * Bootstrap
+     * @throws \Exception
+     */
 	function __construct() {
 		$this->f3=\Base::instance();
 		$config=$this->f3->get('MULTILANG');
 		//languages definition
 		if (!isset($config['languages']) || !$config['languages'])
-			user_error(self::E_NoLang,E_USER_ERROR);
+			throw new \Exception(self::E_NoLang);
 		foreach($config['languages'] as $lang=>$locales) {
 			if (is_array($locales))
 				$locales=implode(',',$locales);
