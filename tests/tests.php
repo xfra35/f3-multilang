@@ -14,7 +14,7 @@ class Tests {
 		$this->ml=new Multilang;
 		//plugin configuration
 		$test->expect(
-			$this->ml->languages()==array('fr','it','de','en'),
+			$this->ml->languages()==['fr','it','de','en'],
 			'Languages definition'
 		);
 		$test->expect(
@@ -46,14 +46,14 @@ class Tests {
 		$aliases=&$f3->ref('ALIASES');
 		$this->simulate('/de/etwas');//german URL
 		$test->expect(
-			array_keys($routes)==array('/de','/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*','/') &&
-				array_values($aliases)==array('/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*'),
+			array_keys($routes)==['/de','/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*','/'] &&
+				array_values($aliases)==['/de/legal','/de/faq','/de/blog/@slug','/resize/@format/@file','/de/foo/@bar/*'],
 			'ROUTES and ALIASES rewritten (auto)'
 		);
 		$this->simulate('/fr/quelque-chose');//french URL
 		$test->expect(
-			array_keys($routes)==array('/fr','/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*','/') &&
-				array_values($aliases)==array('/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*'),
+			array_keys($routes)==['/fr','/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*','/'] &&
+				array_values($aliases)==['/fr/mentions-legales','/fr/foire-aux-questions','/resize/@format/@file','/fr/foo/@bar/*'],
 			'ROUTES and ALIASES rewritten (custom)'
 		);
 		$test->expect(
@@ -73,7 +73,7 @@ class Tests {
 			!in_array('/fr/resize/@format/@file',$aliases) && in_array('/resize/@format/@file',$aliases),
 			'Global route not rewritten (alias)'
 		);
-		$f3->set('MULTILANG.global',array('resize','/blog'));
+		$f3->set('MULTILANG.global',['resize','/blog']);
 		$this->simulate('/en/something');//english URL
 		$test->expect(
 			!array_key_exists('/en/blog/@slug',$routes) && array_key_exists('/blog/@slug',$routes) &&
@@ -166,12 +166,12 @@ class Tests {
 			'Reroute to a named global route'
 		);
 		$ok=TRUE;
-		$reroutes=array(
+		$reroutes=[
 			NULL=>$f3->REALM,
 			'/'=>'/de',
 			'/blog/hallo-welt'=>'/de/blog/hallo-welt',
 			'/de/blog/hallo-welt'=>'/de/blog/hallo-welt',
-		);
+        ];
 		foreach($reroutes as $url=>$expected) {
 			$f3->clear('rerouted');
 			$this->ml->reroute($url);

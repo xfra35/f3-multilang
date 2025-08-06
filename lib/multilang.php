@@ -36,13 +36,13 @@ class Multilang extends \Prefab {
 
 	protected
 		//! available languages
-		$languages=array(),
+		$languages=[],
 		//! original ALIASES
-		$_aliases=array(),
+		$_aliases=[],
 		//! language-specific rules
-		$rules=array(),
+		$rules=[],
 		//! aliases of global routes
-		$global_aliases=array(),
+		$global_aliases=[],
 		//! regex for global routes
 		$global_regex=NULL;
 
@@ -197,9 +197,9 @@ class Multilang extends \Prefab {
      * @throws \Exception
      */
 	protected function rewrite() {
-		$routes=array();
+		$routes=[];
 		$aliases=&$this->f3->ref('ALIASES');
-		$redirects=array();
+		$redirects=[];
 		foreach($this->f3->get('ROUTES') as $old=>$data) {
 			$route=current(current($data));//let's pick up any route just to get the URL name
 			$name=@$route[3];//PHP 5.3 compatibility
@@ -241,7 +241,7 @@ class Multilang extends \Prefab {
      * @throws \Exception
      */
 	function __get($name) {
-		if (in_array($name,array('current','primary','auto','passthru')))
+		if (in_array($name,['current','primary','auto','passthru']))
 			return $this->$name;
 		throw new \Exception(sprintf(self::E_Undefined,__CLASS__,$name));
 	}
@@ -264,7 +264,7 @@ class Multilang extends \Prefab {
 				$this->primary=$lang;
 			}
 			$this->languages[$lang]=$locales;
-			$this->rules[$lang]=array();
+			$this->rules[$lang]=[];
 		}
 		//aliases definition
 		$this->_aliases=$this->f3->get('ALIASES');
@@ -282,8 +282,8 @@ class Multilang extends \Prefab {
 			//global routes
 			if (isset($config['global'])) {
 				if (!is_array($config['global']))
-					$config['global']=array($config['global']);
-				$prefixes=array();
+					$config['global']=[$config['global']];
+				$prefixes=[];
 				foreach($config['global'] as $global)
 					if (@$global[0]=='/')
 						$prefixes[]=$global;
